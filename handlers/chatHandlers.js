@@ -1,4 +1,5 @@
 import { dbQuery } from "./databaseHandler.js";
+import { PAWGPT_ID } from "./envHandler.js";
 
 const getChatMessages = async (req, res) => {
     const user = req.user;
@@ -33,10 +34,10 @@ const chatResponse = async (req, res) => {
         }
 
         await dbQuery("INSERT INTO messages(senderid, receiverid, messagetext, messagetimestamp) VALUES($1, $2, $3, $4)",
-            [user.id, 0, req.body.messagetext, req.body.messagetimestamp]
+            [user.id, PAWGPT_ID, req.body.messagetext, req.body.messagetimestamp]
         );
         await dbQuery("INSERT INTO messages(senderid, receiverid, messagetext, messagetimestamp) VALUES($1, $2, $3, $4)",
-            [0, user.id, serverResponse.answer, serverResponse.timestamp]
+            [PAWGPT_ID, user.id, serverResponse.answer, serverResponse.timestamp]
         );
 
         res.json({ response: serverResponse.answer, timestamp: today });
@@ -54,7 +55,7 @@ const deleteChatMessage = async (req, res) => {
         console.log(req.user);
         const messageTimestamp = req.params["messagetimestamp"];
         let senderid;
-        if (req.params["sender"] === "PawGPT") senderid = 0;
+        if (req.params["sender"] === "PawGPT") senderid = PAWGPT_ID;
         else senderid = req.user.id;
 
         console.log("Starting deletion");

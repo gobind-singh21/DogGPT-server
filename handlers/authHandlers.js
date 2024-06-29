@@ -20,7 +20,7 @@ const authLogin = async (req, res) => {
         const user = dbResponse.rows[0];
 
         // console.log("starting hashing");
-        bcrypt.compare(userPassword, user.pass, (err, isMatching) => {
+        bcrypt.compare(userPassword, user.password, (err, isMatching) => {
             if (err) {
                 // console.log("hashing error", err);
                 return res.status(500).json({ message: "Internal server error" });
