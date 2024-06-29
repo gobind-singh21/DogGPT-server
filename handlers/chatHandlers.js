@@ -42,28 +42,30 @@ const chatResponse = async (req, res) => {
 
         res.json({ response: serverResponse.answer, timestamp: today });
     } catch (error) {
+        console.log(error);
         res.status(500).json({ message: "Internal server error" });
     }
 };
 
 const deleteChatMessage = async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     if (!req.params["messagetimestamp"] || !req.params["sender"]) {
+        console.log(req.params);
         res.status(400).json({ message: "Request is malformed" });
     }
     try {
-        console.log(req.user);
+        // console.log(req.user);
         const messageTimestamp = req.params["messagetimestamp"];
         let senderid;
         if (req.params["sender"] === "PawGPT") senderid = PAWGPT_ID;
         else senderid = req.user.id;
 
-        console.log("Starting deletion");
+        // console.log("Starting deletion");
         const dbResponse = await dbQuery("DELETE FROM messages WHERE senderid=$1 AND messagetimestamp=$2",
             [senderid, messageTimestamp]
         );
-        console.log("Deletion ended");
-        console.log(dbResponse);
+        // console.log("Deletion ended");
+        // console.log(dbResponse);
 
         res.status(200).json({ success: true });
     } catch (error) {
