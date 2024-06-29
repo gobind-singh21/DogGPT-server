@@ -53,15 +53,13 @@ const authLogin = async (req, res) => {
 };
 
 const authSignUp = (req, res) => {
-    console.log(req);
     const { userName, userEmail, userPassword } = req.body;
-    const profileImage = req.file;
-
-    if (!profileImage) {
-        return res.status(400).json({ message: "Profile picture is required" });
-    }
-    console.log(profileImage);
     console.log("request recieved", req.body);
+    if (!(userName && userEmail && userPassword)) {
+        res.status(400).json({ message: "Request is malformed" });
+        return;
+    }
+
     try {
         console.log("started hashing");
         bcrypt.hash(userPassword, parseInt(SALT_ROUNDS), async (err, hashedPassword) => {
@@ -69,17 +67,15 @@ const authSignUp = (req, res) => {
                 console.log("hashing error", err);
                 res.status(500).json({ message: "Internal server error" });
             } else {
-                if (!profileImage.filename) {
-                    console.log("File name undefined");
+                console.log("hashing successful", hashedPassword);
+                const dbResponse = await dbQuery("INSERT INTO users(email, password, name) VALUES($1, $2, $3) RETURNING id, email, name",
+                    [userEmail, hashedPassword, userName]
+                );
+
+                if (!dbResponse) {
                     res.status(500).json({ message: "Internal server error" });
                     return;
                 }
-                const host = req.get("host");
-                const profileImageUrl = `${req.protocol}://${host}/uploads/profile_pictures/${profileImage.filename}`;
-                console.log("hashing successful", hashedPassword);
-                const dbResponse = await dbQuery("INSERT INTO users(email, pass, name, profileimageurl) VALUES($1, $2, $3, $4) RETURNING id, email, name, profileimageurl",
-                    [userEmail, hashedPassword, userName, profileImageUrl]
-                );
 
                 console.log("database insertion successful\nGenerating token");
                 const user = dbResponse.rows[0];

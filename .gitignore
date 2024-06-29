@@ -3,3 +3,6 @@
 
 # node packages
 node_modules
+
+# ssl certificate for DB connection
+ssl_certificate
